@@ -15,6 +15,7 @@ class MainApp(Tk):
         self.display.pack(side=TOP, fill=BOTH, expand=True)
 
         self.teclado = ttk.Frame(self, width=calculator.WIDTH*4 ,height=calculator.HEIGHT*5)
+        self.teclado.grid_propagate(0)
         self.teclado.pack(side=TOP, fill=BOTH, expand=True) 
 
         botonC = calculator.CalcButton(self.teclado, text="C")
