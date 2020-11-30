@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+from ast import literal_eval
 
 WIDTH = 68
 HEIGHT = 50
@@ -111,6 +112,9 @@ class Display(ttk.Frame):
         self.label.pack(side=TOP, fill=BOTH, expand=True)
 
     def refresh(self, texto):
+        if not isinstance(texto, str):
+            texto = literal_eval(str(texto))
+
         self.label.config(text=texto)
 
 class CalcButton(ttk.Frame):
@@ -141,6 +145,94 @@ class Keyboard(ttk.Frame):
             btn.grid(row=boton['r'], column=boton['c'], columnspan=w, rowspan=h)
 
 class Calculator(ttk.Frame):
+    valor1 = None
+    valor2 = None
+    r = None
+    operador = ''
+    cadena = ''
+
+    def __init__(self, parent):
+        ttk.Frame.__init__(self, parent, width=WIDTH*4, height=HEIGHT*6)
+        self.pack_propagate(0)
+        s = ttk.Style()
+        s.theme_use('alt')
+
+        self.display = Display(self)
+        self.display.pack(side=TOP, fill=BOTH, expand=True)
+
+        self.teclado = Keyboard(self, self.gestiona_calculos)
+        self.teclado.pack(side=TOP)
+
+    def formatNumber(self, numero):
+        if numero == int(numero):
+            return int(numero)
+        else:
+            return numero
+
+    def gestiona_calculos(self, tecla):
+
+        if tecla.isdigit():
+            if not (self.cadena == '' and tecla == '0'):
+                self.cadena += tecla
+                self.display.refresh(self.cadena)
+        elif tecla == '.' and '.' not in self.cadena:
+            if self.cadena != '':
+                self.cadena += tecla
+            else:
+                self.cadena = self.cadena + '0' + tecla
+            #self.cadena += tecla if cadena != '' else ('0' + tecla)
+
+            self.display.refresh(self.cadena)
+        elif tecla in tuple('+-x÷'):
+            if self.valor1 == None:
+                self.operador = tecla
+                self.valor1 = float(self.cadena)
+                self.cadena = ''
+            else:
+                if not self.cadena: 
+                    self.operador = tecla
+                    return
+                self.valor2 = float(self.cadena)
+                self.r = self.calculate()
+                self.operador = tecla
+                self.display.refresh(self.r)
+                self.valor1 = self.r
+
+            self.cadena = ''
+        elif tecla == '=':
+            if not self.cadena: 
+                return
+            self.valor2 = float(self.cadena)
+            self.r = self.calculate()
+            self.display.refresh(self.r)
+            self.operador = ''
+            self.valor1 = self.r
+            self.cadena = ''
+        elif tecla == 'C':
+            self.valor1 = None
+            self.valor2 = None
+            self.r = None
+            self.operador = ''
+            self.cadena = ''
+            self.display.refresh('0')
+
+    def calculate(self):
+        '''
+        self.valor1 = 12
+        self.valor2 = 32
+        self.operador = '+' podría haber - ÷ x
+        '''
+        if self.operador == '+':
+            return self.valor1 + self.valor2
+        elif self.operador == '-':
+            return self.valor1 - self.valor2
+        elif self.operador == 'x':
+            return self.valor1 * self.valor2
+        elif self.operador == '÷':
+            return self.valor1 / self.valor2
+        else:
+            print("error en operador")
+            return 'E'
     valor1 = None
     valor2 = None
     r = None
